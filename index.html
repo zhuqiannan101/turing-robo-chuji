@@ -20,6 +20,8 @@ body{background:#f5f6fa;min-height:100vh;display:flex;flex-direction:column;alig
  padding:7px 18px;font-size:14.5px;font-weight:bold;cursor:pointer;font-family:inherit}
 .readbtn:active{transform:scale(.95)}
 .readbtn.reading{background:#42A5F5;color:#fff}
+.vbtn{background:linear-gradient(135deg,#3CB371,#26A69A)!important;box-shadow:0 4px 12px #3CB37155!important}
+.vhint{font-size:13px;color:#999;margin-top:6px}
 .sndbtn{position:fixed;top:14px;left:14px;z-index:99;width:44px;height:44px;border-radius:50%;border:none;
  background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer;font-size:19px}
 .menu{display:flex;gap:16px;margin:0 16px 20px;flex-wrap:wrap;justify-content:center;position:relative;z-index:5}
@@ -108,16 +110,19 @@ h2.res{font-size:30px;text-align:center;margin-bottom:2px}
   <div class="fb" id="fb"></div>
   <div class="acts" id="acts">
     <button class="btn ghost" onclick="showAns()">📖 看解析</button>
-    <button class="btn" onclick="next()">下一题 →</button>
+    <button class="btn" id="quizNextBtn" onclick="next()">下一题 →</button>
   </div>
  </div>
 </div>
 <div id="ans" class="hidden">
  <div class="card">
   <div class="topbar"><span class="plate" id="aPlate"></span><span class="idx" id="aIdx"></span></div>
-  <img class="aimg" id="aImg" alt="解析">
-  <div style="text-align:center"><span class="point" id="aPoint"></span></div>
-  <div style="text-align:center;margin-top:16px"><button class="btn" onclick="next()">下一题 →</button></div>
+  <div id="vidBox" style="margin-top:6px;display:none"></div>
+  <img class="aimg" id="aImg" alt="解析" style="display:none;margin-top:10px">
+  <div style="text-align:center" id="vidOpt"><button class="btn vbtn" id="vidBtn" onclick="playVid()">🎬 看这题的讲解视频</button>
+   <div class="vhint" style="margin-top:6px">老师录的专属讲解，看完再点下一题哦～</div></div>
+  <div style="text-align:center;margin-top:14px"><button class="btn" id="ansNextBtn" onclick="next()">下一题 →</button>
+   <div class="vhint" id="vidHint"></div></div>
  </div>
 </div>
 <div id="result" class="hidden">
@@ -138,7 +143,7 @@ h2.res{font-size:30px;text-align:center;margin-bottom:2px}
 </div>
 <button class="home-ic hidden" id="homeIc" onclick="goHome()">🏠</button>
 <script>
-const QUIZ=[{"plate": "单选", "color": "42A5F5", "point": "循环结构", "ans": 0, "q": "img/jcm1_q.webp", "a": "img/jcm1_a.webp", "opts": ["A", "B", "C", "D"], "read": "天文馆的星象仪运行下图的程序后，一共旋转了多少度？"}, {"plate": "单选", "color": "42A5F5", "point": "坐标定位", "ans": 1, "q": "img/jcm2_q.webp", "a": "img/jcm2_a.webp", "opts": ["A", "B", "C", "D"], "read": "农场的稻草人站在下图的位置，请问它的坐标是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "角色方向", "ans": 2, "q": "img/jcm3_q.webp", "a": "img/jcm3_a.webp", "opts": ["A", "B", "C", "D"], "read": "建筑工地的塔吊原来朝向左边，它运行下面的程序后，会朝向哪个方向？"}, {"plate": "单选", "color": "42A5F5", "point": "简单变量计算", "ans": 3, "q": "img/jcm4_q.webp", "a": "img/jcm4_a.webp", "opts": ["A", "B", "C", "D"], "read": "图书馆的借阅统计屏用变量借阅数记录当天借出的书。它运行下面的程序后，借阅数的值是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "区分使用控制类积木", "ans": 0, "q": "img/jcm5_q.webp", "a": "img/jcm5_a.webp", "opts": ["A", "B", "C", "D"], "read": "冰雪世界的溜冰鞋要不停地重复滑行动作，应该使用下面哪个积木？"}, {"plate": "单选", "color": "42A5F5", "point": "坐标设为/增加", "ans": 1, "q": "img/jcm6_q.webp", "a": "img/jcm6_a.webp", "opts": ["A", "B", "C", "D"], "read": "快递驿站的分拣带原来的坐标是负160逗0，它运行下面的程序后，会移到哪个位置？"}, {"plate": "单选", "color": "42A5F5", "point": "如果那么/如果那么否则", "ans": 2, "q": "img/jcm7_q.webp", "a": "img/jcm7_a.webp", "opts": ["A", "B", "C", "D"], "read": "面包店的烤箱要实现这样的效果：烤制面包的时间超过10分钟就换成出炉造型，没超过就换成加热中造型。下面哪段程序能实现这个效果？"}, {"plate": "单选", "color": "42A5F5", "point": "随机运算", "ans": 3, "q": "img/jcm8_q.webp", "a": "img/jcm8_a.webp", "opts": ["A", "B", "C", "D"], "read": "马戏团的抽奖转盘运行下面的程序后，变量奖号最大可能是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "克隆", "ans": 0, "q": "img/jcm9_q.webp", "a": "img/jcm9_a.webp", "opts": ["A", "B", "C", "D"], "read": "温室花园里的洒水器运行下面的程序后，舞台上会出现什么效果？"}, {"plate": "单选", "color": "42A5F5", "point": "区分使用【广播】和【广播并等待】", "ans": 1, "q": "img/jcm10_q.webp", "a": "img/jcm10_a.webp", "opts": ["A", "B", "C", "D"], "read": "宠物医院的护士和医生要配合完成检查，护士和医生分别如下图所示。请问他们的配合顺序是怎样的？"}, {"plate": "单选", "color": "42A5F5", "point": "造型切换", "ans": 1, "q": "img/jcy1_q.webp", "a": "img/jcy1_a.webp", "opts": ["A", "B", "C", "D"], "read": "放学路上，小舟看到路口的红绿灯每2秒换一次灯，一直这样循环下去。下面哪段程序能实现这个效果？"}, {"plate": "单选", "color": "42A5F5", "point": "认读坐标", "ans": 3, "q": "img/jcy2_q.webp", "a": "img/jcy2_a.webp", "opts": ["A", "B", "C", "D"], "read": "小丑鱼在海底世界里游玩，它现在的位置如下图所示。请问小丑鱼的坐标是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "左转/右转", "ans": 0, "q": "img/jcy3_q.webp", "a": "img/jcy3_a.webp", "opts": ["A", "B", "C", "D"], "read": "游乐园里的碰碰车原来车头朝向右，它运行下面的程序后，车头朝哪个方向？"}, {"plate": "单选", "color": "42A5F5", "point": "将变量设为/增加", "ans": 2, "q": "img/jcy4_q.webp", "a": "img/jcy4_a.webp", "opts": ["A", "B", "C", "D"], "read": "秋天到了，小林去果园摘苹果，用变量苹果数记录摘到的个数。他运行下面的程序后，苹果数的值是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "区分【移到】和【滑行】", "ans": 1, "q": "img/jcy5_q.webp", "a": "img/jcy5_a.webp", "opts": ["A", "B", "C", "D"], "read": "妈妈在菜市场买完菜，想让购物车立刻出现在市场入口，x是负200、y是0，中间不要有移动的过程。应该用下面哪个代码块？"}, {"plate": "单选", "color": "42A5F5", "point": "随机运算", "ans": 3, "q": "img/jcy6_q.webp", "a": "img/jcy6_a.webp", "opts": ["A", "B", "C", "D"], "read": "生日派对上有一台抽奖机，它运行下面的程序来生成号码。运行程序结束后，请问变量号码最小可能是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "区分使用【广播】和【广播并等待】", "ans": 1, "q": "img/jcy7_q.webp", "a": "img/jcy7_a.webp", "opts": ["A", "B", "C", "D"], "read": "动物运动会上，小兔子和小狐狸参加接力跑，它们的程序如下图。请问它们的跑步顺序是怎样的？"}, {"plate": "单选", "color": "42A5F5", "point": "简单变量计算", "ans": 0, "q": "img/jcy8_q.webp", "a": "img/jcy8_a.webp", "opts": ["A", "B", "C", "D"], "read": "校运会上，小选手绕着操场跑圈，用变量圈数记录跑完的圈数。他运行下面的程序后，圈数的值是多少？"}, {"plate": "单选", "color": "42A5F5", "point": "克隆", "ans": 2, "q": "img/jcy9_q.webp", "a": "img/jcy9_a.webp", "opts": ["A", "B", "C", "D"], "read": "太空探险途中要生成一片小行星带，小行星的程序如下图。它运行程序后，舞台上一共能看到几颗小行星？"}, {"plate": "单选", "color": "42A5F5", "point": "重复执行直到", "ans": 2, "q": "img/jcy10_q.webp", "a": "img/jcy10_a.webp", "opts": ["A", "B", "C", "D"], "read": "小螃蟹在海底一直走，碰到礁石就停下来不再移动。下面哪段程序能实现这个效果？"}, {"plate": "判断", "color": "00ACC1", "point": "造型切换", "ans": 0, "q": "img/jcm11_q.webp", "a": "img/jcm11_a.webp", "opts": ["正确", "错误"], "read": "消防站的警报器有下图3个造型，它运行下图程序后，会变成闪烁造型。"}, {"plate": "判断", "color": "00ACC1", "point": "将大小设为/增加", "ans": 0, "q": "img/jcm12_q.webp", "a": "img/jcm12_a.webp", "opts": ["正确", "错误"], "read": "邮局的包裹图标现在的大小是60，运行下图程序后，它的大小会变成90。"}, {"plate": "判断", "color": "00ACC1", "point": "左转/右转", "ans": 1, "q": "img/jcm13_q.webp", "a": "img/jcm13_a.webp", "opts": ["正确", "错误"], "read": "帆船码头的风向标原来朝向正右方，它运行下图程序后，会朝向正左方。"}, {"plate": "判断", "color": "00ACC1", "point": "广播", "ans": 1, "q": "img/jcm14_q.webp", "a": "img/jcm14_a.webp", "opts": ["正确", "错误"], "read": "音乐会开场铃响之后，钢琴师和小提琴手都会开始演奏。"}, {"plate": "判断", "color": "00ACC1", "point": "图案", "ans": 0, "q": "img/jcm15_q.webp", "a": "img/jcm15_a.webp", "opts": ["正确", "错误"], "read": "农场的鸡蛋收集器运行下图程序后，舞台上会看到7个鸡蛋。"}, {"plate": "判断", "color": "00ACC1", "point": "关系运算", "ans": 1, "q": "img/jcm16_q.webp", "a": "img/jcm16_a.webp", "opts": ["正确", "错误"], "read": "滑雪场的计分员用变量分数记录得分，当前分数的值是45，下图积木的运算结果是成立的。"}, {"plate": "判断", "color": "00ACC1", "point": "嵌套循环", "ans": 0, "q": "img/jcm17_q.webp", "a": "img/jcm17_a.webp", "opts": ["正确", "错误"], "read": "糖果运行下图程序后，只要按下空格键，就会克隆出糖果。"}, {"plate": "判断", "color": "00ACC1", "point": "碰到鼠标指针/舞台边缘/颜色", "ans": 0, "q": "img/jcm18_q.webp", "a": "img/jcm18_a.webp", "opts": ["正确", "错误"], "read": "森林野餐时，小松鼠运行下图程序后，只要碰到红色的浆果，就会立刻停下捡拾。"}, {"plate": "判断", "color": "00ACC1", "point": "抬笔落笔", "ans": 1, "q": "img/jcm19_q.webp", "a": "img/jcm19_a.webp", "opts": ["正确", "错误"], "read": "建筑工地的安全员运行下图程序后，会在地面上画出一条连续不间断的巡视路线。"}, {"plate": "判断", "color": "00ACC1", "point": "克隆", "ans": 0, "q": "img/jcm20_q.webp", "a": "img/jcm20_a.webp", "opts": ["正确", "错误"], "read": "天文馆的流星雨效果中，流星的程序如下图。它运行程序后，本体流星始终隐藏不显示，5颗克隆体流星依次从舞台上方出现，向下划过并消失。"}, {"plate": "判断", "color": "00ACC1", "point": "造型切换", "ans": 1, "q": "img/jcy11_q.webp", "a": "img/jcy11_a.webp", "opts": ["正确", "错误"], "read": "游乐园的旋转木马运行下图程序后，一共转了180度。"}, {"plate": "判断", "color": "00ACC1", "point": "将大小设为/增加", "ans": 0, "q": "img/jcy12_q.webp", "a": "img/jcy12_a.webp", "opts": ["正确", "错误"], "read": "小海龟原来的坐标是负100逗负60，运行下图程序后，它会移到负100逗40。"}, {"plate": "判断", "color": "00ACC1", "point": "左转/右转", "ans": 1, "q": "img/jcy13_q.webp", "a": "img/jcy13_a.webp", "opts": ["正确", "错误"], "read": "棉花糖现在的大小是60，运行下图程序后，它的大小会变成80。"}, {"plate": "判断", "color": "00ACC1", "point": "广播", "ans": 1, "q": "img/jcy14_q.webp", "a": "img/jcy14_a.webp", "opts": ["正确", "错误"], "read": "下图发令枪运行程序后，小豹子和小马都会朝着终点移动。"}, {"plate": "判断", "color": "00ACC1", "point": "图案", "ans": 1, "q": "img/jcy15_q.webp", "a": "img/jcy15_a.webp", "opts": ["正确", "错误"], "read": "小推车和轮印角色如下图1，小推车运行下图2的程序后，舞台区中可以印出4个轮印。"}, {"plate": "判断", "color": "00ACC1", "point": "关系运算", "ans": 0, "q": "img/jcy16_q.webp", "a": "img/jcy16_a.webp", "opts": ["正确", "错误"], "read": "小潜艇运行下图程序后，会一直向右移动，碰到舞台边缘时停止移动。"}, {"plate": "判断", "color": "00ACC1", "point": "嵌套循环", "ans": 0, "q": "img/jcy17_q.webp", "a": "img/jcy17_a.webp", "opts": ["正确", "错误"], "read": "小机器人运行下图程序后，只要按下空格键，它就会往上飞。"}, {"plate": "判断", "color": "00ACC1", "point": "碰到鼠标指针/舞台边缘/颜色", "ans": 1, "q": "img/jcy18_q.webp", "a": "img/jcy18_a.webp", "opts": ["正确", "错误"], "read": "运行下图代码比较价格时，如果变量价格的值是5，那么下图积木的运算结果是成立的。"}, {"plate": "判断", "color": "00ACC1", "point": "抬笔落笔", "ans": 1, "q": "img/jcy19_q.webp", "a": "img/jcy19_a.webp", "opts": ["正确", "错误"], "read": "动物园的小导游运行下图程序后，会在舞台上画出一条长度为250的线段。"}, {"plate": "判断", "color": "00ACC1", "point": "克隆", "ans": 0, "q": "img/jcy20_q.webp", "a": "img/jcy20_a.webp", "opts": ["正确", "错误"], "read": "生日派对上要做糖果雨的效果，糖果的程序如下图。它运行程序后，会看到一个糖果在上方不动，5个糖果分别从舞台右上角的随机位置出现，持续下落，落到舞台下方后消失。"}];
+const QUIZ=[{"plate": "单选", "color": "42A5F5", "point": "循环结构", "ans": 0, "q": "img/jcm1_q.webp", "a": "img/jcm1_a.webp", "opts": ["A", "B", "C", "D"], "read": "天文馆的星象仪运行下图的程序后，一共旋转了多少度？", "vid": "vid/m01.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "坐标定位", "ans": 1, "q": "img/jcm2_q.webp", "a": "img/jcm2_a.webp", "opts": ["A", "B", "C", "D"], "read": "农场的稻草人站在下图的位置，请问它的坐标是多少？", "vid": "vid/m02.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "角色方向", "ans": 2, "q": "img/jcm3_q.webp", "a": "img/jcm3_a.webp", "opts": ["A", "B", "C", "D"], "read": "建筑工地的塔吊原来朝向左边，它运行下面的程序后，会朝向哪个方向？", "vid": "vid/m03.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "简单变量计算", "ans": 3, "q": "img/jcm4_q.webp", "a": "img/jcm4_a.webp", "opts": ["A", "B", "C", "D"], "read": "图书馆的借阅统计屏用变量借阅数记录当天借出的书。它运行下面的程序后，借阅数的值是多少？", "vid": "vid/m04.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "区分使用控制类积木", "ans": 0, "q": "img/jcm5_q.webp", "a": "img/jcm5_a.webp", "opts": ["A", "B", "C", "D"], "read": "冰雪世界的溜冰鞋要不停地重复滑行动作，应该使用下面哪个积木？", "vid": "vid/m05.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "坐标设为/增加", "ans": 1, "q": "img/jcm6_q.webp", "a": "img/jcm6_a.webp", "opts": ["A", "B", "C", "D"], "read": "快递驿站的分拣带原来的坐标是负160逗0，它运行下面的程序后，会移到哪个位置？", "vid": "vid/m06.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "如果那么/如果那么否则", "ans": 2, "q": "img/jcm7_q.webp", "a": "img/jcm7_a.webp", "opts": ["A", "B", "C", "D"], "read": "面包店的烤箱要实现这样的效果：烤制面包的时间超过10分钟就换成出炉造型，没超过就换成加热中造型。下面哪段程序能实现这个效果？", "vid": "vid/m07.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "随机运算", "ans": 3, "q": "img/jcm8_q.webp", "a": "img/jcm8_a.webp", "opts": ["A", "B", "C", "D"], "read": "马戏团的抽奖转盘运行下面的程序后，变量奖号最大可能是多少？", "vid": "vid/m08.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "克隆", "ans": 0, "q": "img/jcm9_q.webp", "a": "img/jcm9_a.webp", "opts": ["A", "B", "C", "D"], "read": "温室花园里的洒水器运行下面的程序后，舞台上会出现什么效果？", "vid": "vid/m09.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "区分使用【广播】和【广播并等待】", "ans": 1, "q": "img/jcm10_q.webp", "a": "img/jcm10_a.webp", "opts": ["A", "B", "C", "D"], "read": "宠物医院的护士和医生要配合完成检查，护士和医生分别如下图所示。请问他们的配合顺序是怎样的？", "vid": "vid/m10.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "造型切换", "ans": 1, "q": "img/jcy1_q.webp", "a": "img/jcy1_a.webp", "opts": ["A", "B", "C", "D"], "read": "放学路上，小舟看到路口的红绿灯每2秒换一次灯，一直这样循环下去。下面哪段程序能实现这个效果？", "vid": "vid/y01.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "认读坐标", "ans": 3, "q": "img/jcy2_q.webp", "a": "img/jcy2_a.webp", "opts": ["A", "B", "C", "D"], "read": "小丑鱼在海底世界里游玩，它现在的位置如下图所示。请问小丑鱼的坐标是多少？", "vid": "vid/y02.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "左转/右转", "ans": 0, "q": "img/jcy3_q.webp", "a": "img/jcy3_a.webp", "opts": ["A", "B", "C", "D"], "read": "游乐园里的碰碰车原来车头朝向右，它运行下面的程序后，车头朝哪个方向？", "vid": "vid/y03.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "将变量设为/增加", "ans": 2, "q": "img/jcy4_q.webp", "a": "img/jcy4_a.webp", "opts": ["A", "B", "C", "D"], "read": "秋天到了，小林去果园摘苹果，用变量苹果数记录摘到的个数。他运行下面的程序后，苹果数的值是多少？", "vid": "vid/y04.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "区分【移到】和【滑行】", "ans": 1, "q": "img/jcy5_q.webp", "a": "img/jcy5_a.webp", "opts": ["A", "B", "C", "D"], "read": "妈妈在菜市场买完菜，想让购物车立刻出现在市场入口，x是负200、y是0，中间不要有移动的过程。应该用下面哪个代码块？", "vid": "vid/y05.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "随机运算", "ans": 3, "q": "img/jcy6_q.webp", "a": "img/jcy6_a.webp", "opts": ["A", "B", "C", "D"], "read": "生日派对上有一台抽奖机，它运行下面的程序来生成号码。运行程序结束后，请问变量号码最小可能是多少？", "vid": "vid/y06.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "区分使用【广播】和【广播并等待】", "ans": 1, "q": "img/jcy7_q.webp", "a": "img/jcy7_a.webp", "opts": ["A", "B", "C", "D"], "read": "动物运动会上，小兔子和小狐狸参加接力跑，它们的程序如下图。请问它们的跑步顺序是怎样的？", "vid": "vid/y07.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "简单变量计算", "ans": 0, "q": "img/jcy8_q.webp", "a": "img/jcy8_a.webp", "opts": ["A", "B", "C", "D"], "read": "校运会上，小选手绕着操场跑圈，用变量圈数记录跑完的圈数。他运行下面的程序后，圈数的值是多少？", "vid": "vid/y08.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "克隆", "ans": 2, "q": "img/jcy9_q.webp", "a": "img/jcy9_a.webp", "opts": ["A", "B", "C", "D"], "read": "太空探险途中要生成一片小行星带，小行星的程序如下图。它运行程序后，舞台上一共能看到几颗小行星？", "vid": "vid/y09.mp4"}, {"plate": "单选", "color": "42A5F5", "point": "重复执行直到", "ans": 2, "q": "img/jcy10_q.webp", "a": "img/jcy10_a.webp", "opts": ["A", "B", "C", "D"], "read": "小螃蟹在海底一直走，碰到礁石就停下来不再移动。下面哪段程序能实现这个效果？", "vid": "vid/y10.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "造型切换", "ans": 0, "q": "img/jcm11_q.webp", "a": "img/jcm11_a.webp", "opts": ["正确", "错误"], "read": "消防站的警报器有下图3个造型，它运行下图程序后，会变成闪烁造型。", "vid": "vid/m11.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "将大小设为/增加", "ans": 0, "q": "img/jcm12_q.webp", "a": "img/jcm12_a.webp", "opts": ["正确", "错误"], "read": "邮局的包裹图标现在的大小是60，运行下图程序后，它的大小会变成90。", "vid": "vid/m12.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "左转/右转", "ans": 1, "q": "img/jcm13_q.webp", "a": "img/jcm13_a.webp", "opts": ["正确", "错误"], "read": "帆船码头的风向标原来朝向正右方，它运行下图程序后，会朝向正左方。", "vid": "vid/m13.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "广播", "ans": 1, "q": "img/jcm14_q.webp", "a": "img/jcm14_a.webp", "opts": ["正确", "错误"], "read": "音乐会开场铃响之后，钢琴师和小提琴手都会开始演奏。", "vid": "vid/m14.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "图案", "ans": 0, "q": "img/jcm15_q.webp", "a": "img/jcm15_a.webp", "opts": ["正确", "错误"], "read": "农场的鸡蛋收集器运行下图程序后，舞台上会看到7个鸡蛋。", "vid": "vid/m15.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "关系运算", "ans": 1, "q": "img/jcm16_q.webp", "a": "img/jcm16_a.webp", "opts": ["正确", "错误"], "read": "滑雪场的计分员用变量分数记录得分，当前分数的值是45，下图积木的运算结果是成立的。", "vid": "vid/m16.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "嵌套循环", "ans": 0, "q": "img/jcm17_q.webp", "a": "img/jcm17_a.webp", "opts": ["正确", "错误"], "read": "糖果运行下图程序后，只要按下空格键，就会克隆出糖果。", "vid": "vid/m17.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "碰到鼠标指针/舞台边缘/颜色", "ans": 0, "q": "img/jcm18_q.webp", "a": "img/jcm18_a.webp", "opts": ["正确", "错误"], "read": "森林野餐时，小松鼠运行下图程序后，只要碰到红色的浆果，就会立刻停下捡拾。", "vid": "vid/m18.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "抬笔落笔", "ans": 1, "q": "img/jcm19_q.webp", "a": "img/jcm19_a.webp", "opts": ["正确", "错误"], "read": "建筑工地的安全员运行下图程序后，会在地面上画出一条连续不间断的巡视路线。", "vid": "vid/m19.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "克隆", "ans": 0, "q": "img/jcm20_q.webp", "a": "img/jcm20_a.webp", "opts": ["正确", "错误"], "read": "天文馆的流星雨效果中，流星的程序如下图。它运行程序后，本体流星始终隐藏不显示，5颗克隆体流星依次从舞台上方出现，向下划过并消失。", "vid": "vid/m20.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "造型切换", "ans": 1, "q": "img/jcy11_q.webp", "a": "img/jcy11_a.webp", "opts": ["正确", "错误"], "read": "游乐园的旋转木马运行下图程序后，一共转了180度。", "vid": "vid/y11.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "将大小设为/增加", "ans": 0, "q": "img/jcy12_q.webp", "a": "img/jcy12_a.webp", "opts": ["正确", "错误"], "read": "小海龟原来的坐标是负100逗负60，运行下图程序后，它会移到负100逗40。", "vid": "vid/y12.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "左转/右转", "ans": 1, "q": "img/jcy13_q.webp", "a": "img/jcy13_a.webp", "opts": ["正确", "错误"], "read": "棉花糖现在的大小是60，运行下图程序后，它的大小会变成80。", "vid": "vid/y13.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "广播", "ans": 1, "q": "img/jcy14_q.webp", "a": "img/jcy14_a.webp", "opts": ["正确", "错误"], "read": "下图发令枪运行程序后，小豹子和小马都会朝着终点移动。", "vid": "vid/y14.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "图案", "ans": 1, "q": "img/jcy15_q.webp", "a": "img/jcy15_a.webp", "opts": ["正确", "错误"], "read": "小推车和轮印角色如下图1，小推车运行下图2的程序后，舞台区中可以印出4个轮印。", "vid": "vid/y15.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "关系运算", "ans": 0, "q": "img/jcy16_q.webp", "a": "img/jcy16_a.webp", "opts": ["正确", "错误"], "read": "小潜艇运行下图程序后，会一直向右移动，碰到舞台边缘时停止移动。", "vid": "vid/y16.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "嵌套循环", "ans": 0, "q": "img/jcy17_q.webp", "a": "img/jcy17_a.webp", "opts": ["正确", "错误"], "read": "小机器人运行下图程序后，只要按下空格键，它就会往上飞。", "vid": "vid/y17.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "碰到鼠标指针/舞台边缘/颜色", "ans": 1, "q": "img/jcy18_q.webp", "a": "img/jcy18_a.webp", "opts": ["正确", "错误"], "read": "运行下图代码比较价格时，如果变量价格的值是5，那么下图积木的运算结果是成立的。", "vid": "vid/y18.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "抬笔落笔", "ans": 1, "q": "img/jcy19_q.webp", "a": "img/jcy19_a.webp", "opts": ["正确", "错误"], "read": "动物园的小导游运行下图程序后，会在舞台上画出一条长度为250的线段。", "vid": "vid/y19.mp4"}, {"plate": "判断", "color": "00ACC1", "point": "克隆", "ans": 0, "q": "img/jcy20_q.webp", "a": "img/jcy20_a.webp", "opts": ["正确", "错误"], "read": "生日派对上要做糖果雨的效果，糖果的程序如下图。它运行程序后，会看到一个糖果在上方不动，5个糖果分别从舞台右上角的随机位置出现，持续下落，落到舞台下方后消失。", "vid": "vid/y20.mp4"}];
 const SFX={"coin": "sfx/coin.mp3", "double": "sfx/double.mp3", "triple": "sfx/triple.mp3", "quadra": "sfx/quadra.mp3", "penta": "sfx/penta.mp3", "legendary": "sfx/legendary.mp3", "welcome": "sfx/welcome.mp3", "fail": "sfx/fail.mp3"};
 const KEY="robo_jc_v2";
 const GROUP="\u3010RoboRAVE\u521d\u7ea7\u7ec4\u5237\u9898\u3011";
@@ -154,7 +159,7 @@ function start(mode){
  if(!kidName){alert("请先在上方输入孩子的姓名哦～");try{document.getElementById("nameIn").focus()}catch(e){};return}
  if(mode==="wrong"){order=shuffled([...wrong]).slice(0,15);if(!order.length){alert("错题本是空的，太棒了！🎉");return}}
  else order=shuffled([...QUIZ.keys()]).slice(0,15);
- cur=0;ansMap={};coins=0;combo=0;document.getElementById("coinN").textContent="0";
+ cur=0;ansMap={};coins=0;combo=0;videoDone=new Set();document.getElementById("coinN").textContent="0";
  show(["quiz"]);render();
 }
 function show(ids){for(const id of["home","quiz","ans","result"])document.getElementById(id).classList.toggle("hidden",!ids.includes(id));
@@ -180,6 +185,9 @@ function render(){
   fb.innerHTML=ok?`${PRAISE[Math.floor(Math.random()*PRAISE.length)]}${combo>=3?`<span class="combo">🔥 连对 ${combo} 题！</span>`:""}<span style="float:right">答对 +3 金币</span>`
    :`${CHEER[Math.floor(Math.random()*CHEER.length)]}<span style="float:right">正确答案：${q.opts[q.ans]}</span>`;
   document.getElementById("acts").style.display="flex";
+   const qnb=document.getElementById("quizNextBtn");
+   if(qnb){if(ansMap[cur]!==q.ans&&q.vid){qnb.textContent="看讲解进入下一题";qnb.style.background="linear-gradient(135deg,#3CB371,#26A69A)"}
+     else{qnb.textContent="下一题 →";qnb.style.background=""}}
  }else{fb.className="fb";document.getElementById("acts").style.display="none"}
 }
 function pick(li){
@@ -197,12 +205,46 @@ function showAns(){
  const pEl=document.getElementById("aPlate");
  pEl.textContent=q.plate;pEl.style.background="#"+q.color;
  document.getElementById("aIdx").textContent=`第 ${cur+1} / ${order.length} 题`;
- document.getElementById("aImg").src=q.a;
- document.getElementById("aPoint").textContent="🎯 考点："+q.point;
+ stopSpeak();
+ const vb=document.getElementById("vidBox");vb.style.display="none";vb.innerHTML="";vb.dataset.src="";
+ const nb=document.getElementById("ansNextBtn");
+ const vo=document.getElementById("vidOpt");
+ const hint=document.getElementById("vidHint");
+ const im=document.getElementById("aImg");
+ const wrongAns=ansMap[cur]!==undefined&&ansMap[cur]!==q.ans;
  show(["ans"]);
+ nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+ if(wrongAns&&q.vid){
+   im.style.display="none";
+   if(vo)vo.style.display="none";
+   if(hint)hint.textContent="👀 看完讲解视频才能进入下一题哦";
+   nb.disabled=true;nb.style.opacity=".45";nb.textContent="看完视频才能进入下一题 👀";
+   playVid();
+   const vd=vb.querySelector("video");
+   const unlock=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+     if(hint)hint.textContent="✅ 讲解看完啦，记住这个知识点！"};
+   if(vd){vd.muted=false;vd.onended=unlock;
+     vd.onerror=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+       if(hint)hint.textContent="⚠️ 视频加载失败，先继续做下一题吧～"};}
+   else unlock();
+ }else if(!q.vid){
+   if(vo)vo.style.display="none";
+   if(im&&q.a){im.src=q.a;im.style.display="block"}
+   if(hint)hint.textContent="📖 图文解析";
+ }else{
+   im.style.display="none";
+   if(vo){vo.style.display="block";
+     const vb2=document.getElementById("vidBtn");
+     if(vb2)vb2.textContent="🎬 看这题的讲解视频";}
+   if(hint)hint.textContent="";
+ }
 }
 function next(){
  stopSpeak();
+ if(ansMap[cur]!==undefined&&ansMap[cur]!==QUIZ[order[cur]].ans&&QUIZ[order[cur]].vid&&!videoDone.has(order[cur])){
+   showAns();return;
+ }
+ const vb=document.getElementById("vidBox");vb.style.display="none";vb.innerHTML="";vb.dataset.src="";
  cur++;
  if(cur>=order.length){result();return}
  if(document.getElementById("quiz").classList.contains("hidden"))show(["quiz"]);
@@ -297,6 +339,19 @@ function readQ(){
  u.onend=()=>b.classList.remove("reading");
  b.classList.add("reading");
  speechSynthesis.speak(u);
+}
+
+
+// ---------- 讲解视频 ----------
+let videoDone=new Set();
+function playVid(){
+ const q=QUIZ[order[cur]];
+ stopSpeak();
+ const box=document.getElementById("vidBox");
+ if(box.style.display==="block"&&box.dataset.src===q.vid){box.style.display="none";return}
+ box.dataset.src=q.vid;box.style.display="block";
+ box.innerHTML=`<video controls playsinline autoplay style="width:100%;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.15)" src="${q.vid}"></video>`;
+ try{box.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){}
 }
 
 renderProg();renderName();
